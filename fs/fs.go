@@ -46,7 +46,13 @@ func Register(data string) {
 
 // New creates a new file system with the registered zip contents data.
 // It unzips all files and stores them in an in-memory map.
-func New() (http.FileSystem, error) {
+func New(prefix string) (http.FileSystem, error) {
+	if prefix == "" {
+		prefix = "/"
+	}
+	if !strings.HasSuffix(prefix, "/") {
+		prefix = prefix + "/"
+	}
 	if zipData == "" {
 		return nil, errors.New("statik/fs: no zip data registered")
 	}
@@ -60,9 +66,17 @@ func New() (http.FileSystem, error) {
 		if err != nil {
 			return nil, fmt.Errorf("statik/fs: error unzipping file %q: %s", zipFile.Name, err)
 		}
-		files["/"+zipFile.Name] = file{
-			FileInfo: zipFile.FileInfo(),
-			data:     unzipped,
+		zipFileName := "/" + zipFile.Name
+		if strings.HasPrefix(zipFileName, prefix) {
+			if strings.HasPrefix(zipFileName, prefix) {
+				fname := strings.TrimPrefix(zipFileName, prefix)
+				//fmt.Println(prefix, zipFileName, fname)
+				files["/" + fname] = file{
+					FileInfo: zipFile.FileInfo(),
+					data:     unzipped,
+				}
+			}
+
 		}
 	}
 	return &statikFS{files: files}, nil
