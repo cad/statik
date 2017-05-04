@@ -13,7 +13,7 @@ import (
 // Before buildling, run go generate.
 // Then, run the main program and visit http://localhost:8080/public/hello.txt
 func main() {
-	statikFS, err := fs.New()
+	statikFS, err := fs.New("/")
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
